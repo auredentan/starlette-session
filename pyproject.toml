@@ -1,9 +1,20 @@
 [tool.poetry]
 name = "starlette-session"
 version = "0.1.0"
-description = ""
+description = "A library for backend side session with starlette"
 authors = ["Aurélien Dentan <aurelien.dentan@gmail.com>"]
+maintainers = ["Aurélien Dentan <aurelien.dentan@gmail.com>"Aurélien Dentan <aurelien.dentan@gmail.com>"]
 license = "MIT"
+
+readme = "README.md"
+
+homepage = "https://github.com/auredentan/starlette-sessionhttps://github.com/auredentan/starlette-session"
+repository = "https://github.com/auredentan/starlette-sessionhttps://github.com/auredentan/starlette-session"
+
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -22,3 +33,21 @@ pytest-cov = "^2.10.1"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | tests/.*/setup.py
+)/
+'''

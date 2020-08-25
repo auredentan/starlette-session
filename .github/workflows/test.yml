@@ -24,16 +24,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Run image
+      - name: Setup poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
             poetry-version: ${{ matrix.poetry-version }}
-      - uses: actions/cache@v1
-        with:
-            path: ~/.cache/pypoetry/virtualenvs
-            key: ${{ runner.os }}-{{ runner.python-version }}-{{ runner.poetry-version }}-poetry-${{ hashFiles('poetry.lock') }}
-            restore-keys: |
-                ${{ runner.os }}-{{ runner.python-version }}-{{ runner.poetry-version }}-poetry-
     
       - name: Install dependencies
         run: poetry install
