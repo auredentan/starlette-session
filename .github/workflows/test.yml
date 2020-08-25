@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
-        poetry-version: [1.0, 1.0.10]
+        poetry-version: [1.0.10]
         os: [ubuntu-18.04, macos-latest, windows-latest]
       fail-fast: false
     

@@ -6,7 +6,7 @@ authors = ["Aurélien Dentan <aurelien.dentan@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.6"
 starlette = "^0.13.8"
 redis = {version = "^3.5.3", optional = true}
 itsdangerous = "^1.1.0"
