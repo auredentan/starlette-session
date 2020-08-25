@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run pytest --cov starlete_session --cov-report=xml tests/    
+        run: poetry run pytest --cov starlette_session --cov-report=xml tests/    
     
       - name: Upload coverage
         uses: codecov/codecov-action@v1
