@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "starlette-session"
-version = "0.1.6"
+version = "0.2.0"
 description = "A library for backend side session with starlette"
 authors = ["Aurélien Dentan <aurelien.dentan@gmail.com>"]
 maintainers = ["Aurélien Dentan <aurelien.dentan@gmail.com>"]
