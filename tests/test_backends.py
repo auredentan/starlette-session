@@ -1,16 +1,14 @@
 import re
 
-import pytest
-
 import fakeredis
-
+import pytest
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.testclient import TestClient
 
-from starlette_session.backends import BackendType
 from starlette_session import SessionMiddleware
+from starlette_session.backends import BackendType
 
 
 def view_session(request: Request) -> JSONResponse:
@@ -91,4 +89,3 @@ def test_with_redis_backend(mocker, app, redis):
     response = client.post("/clear_session")
     assert response.json() == {"session": {}}
     spy_redis_delete.assert_called_once()
-

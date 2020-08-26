@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-class ISessionBackend(ABC):
 
+class ISessionBackend(ABC):
     @abstractmethod
     def get(self, key: str) -> Optional[dict]:
         raise NotImplementedError()

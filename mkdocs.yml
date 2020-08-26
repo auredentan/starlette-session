@@ -1,0 +1,36 @@
+site_name: Starlette Session
+site_description: Session middleware for starlette.
+  
+site_name: Starlette Session
+site_description: Session middleware for starlette.
+site_url: "https://auredentan.github.io/starlette-session"
+repo_url: "https://github.com/auredentan/starlette-session"
+repo_name: "auredentan/starlette-session"
+
+nav:
+  - Overview: index.md
+
+theme:
+  name: material
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - pymdownx.emoji
+  - pymdownx.tabbed
+  - toc:
+      permalink: "¤"
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append("docs")
+      watch:
+        - starlette_session

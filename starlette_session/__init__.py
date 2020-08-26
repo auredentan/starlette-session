@@ -1,16 +1,18 @@
 import json
-from uuid import uuid4
-from typing import Any, Optional
 from base64 import b64decode, b64encode
+from typing import Any, Optional
+from uuid import uuid4
 
 import itsdangerous
 from itsdangerous.exc import BadTimeSignature, SignatureExpired
-
+from starlette.applications import Starlette
 from starlette.datastructures import MutableHeaders, Secret
+from starlette.middleware.sessions import \
+    SessionMiddleware as BaseSessionMiddleware
 from starlette.requests import HTTPConnection
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from starlette_session.backends import RedisSessionBackend, BackendType
+from starlette_session.backends import BackendType, RedisSessionBackend
 from starlette_session.interfaces import ISessionBackend
 
 
@@ -125,9 +127,9 @@ class SessionMiddleware:
 
     def _construct_cookie(self, clear: bool = False, data=None) -> str:
         if clear:
-            cookie = f"{self.cookie_name}=null; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age={self.max_age}; {self.security_flags}"
+            cookie = f"{self.cookie_name}=null; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; {self.security_flags}"
         else:
-            cookie = f"{self.cookie_name}={data.decode('utf-8')}; path=/; Max-Age={self.max_age}; {self.security_flags}"
+            cookie = f"{self.cookie_name}={data.decode('utf-8')}; Path=/; Max-Age={self.max_age}; {self.security_flags}"
         if self.domain:
             cookie = f"{cookie}; Domain={self.domain}"
         return cookie

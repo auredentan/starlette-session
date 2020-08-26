@@ -1,9 +1,7 @@
-from typing import Any, Optional
 from enum import Enum
-
 from functools import partial
-from pickle import loads, dumps, HIGHEST_PROTOCOL
-
+from pickle import HIGHEST_PROTOCOL, dumps, loads
+from typing import Any, Optional
 
 try:
     from redis import Redis
