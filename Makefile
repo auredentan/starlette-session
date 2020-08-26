@@ -77,7 +77,7 @@ endif
 		poetry run failprint -t "Pushing tags" -- git push --tags; \
 		poetry run failprint -t "Publishing version" -- poetry publish; \
 		poetry run failprint -t "Deploying docs" -- poetry run mkdocs gh-deploy; \
-	f
+	fi
 
 
 .PHONY: test
