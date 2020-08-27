@@ -12,7 +12,8 @@ from starlette.middleware.sessions import \
 from starlette.requests import HTTPConnection
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from starlette_session.backends import BackendType, RedisSessionBackend
+from starlette_session.backends import (AioRedisSessionBackend, BackendType,
+                                        RedisSessionBackend)
 from starlette_session.interfaces import ISessionBackend
 
 
@@ -71,7 +72,8 @@ class SessionMiddleware:
                     session_key = json.loads(b64decode(data)).get(
                         self._cookie_session_id_field
                     )
-                    scope["session"] = self.session_backend.get(session_key)
+                    scope["session"] = await self.session_backend.get(session_key)
+                    scope["__session_key"] = session_key
 
                 initial_session_was_empty = False
             except (BadTimeSignature, SignatureExpired):
@@ -81,14 +83,15 @@ class SessionMiddleware:
 
         async def send_wrapper(message: Message, **kwargs) -> None:
             if message["type"] == "http.response.start":
-                if scope["session"]:
 
-                    session_key = str(uuid4())
+                session_key = scope.pop("__session_key", str(uuid4()))
+
+                if scope["session"]:
 
                     if self.backend_type == BackendType.cookie:
                         cookie_data = scope["session"]
                     else:
-                        self.session_backend.set(
+                        await self.session_backend.set(
                             session_key, scope["session"], self.max_age
                         )
                         cookie_data = {self._cookie_session_id_field: session_key}
@@ -103,11 +106,7 @@ class SessionMiddleware:
                 elif not initial_session_was_empty:
 
                     if self.backend_type != BackendType.cookie:
-                        data = connection.cookies[self.cookie_name].encode("utf-8")
-                        session_key = json.loads(b64decode(data)).get(
-                            self._cookie_session_id_field
-                        )
-                        self.session_backend.delete(session_key)
+                        await self.session_backend.delete(session_key)
 
                     headers = MutableHeaders(scope=message)
                     header_value = self._construct_cookie(clear=True)
@@ -122,6 +121,8 @@ class SessionMiddleware:
             return RedisSessionBackend(backend_db_client)
         elif self.backend_type == BackendType.cookie:
             return
+        elif self.backend_type == BackendType.aioRedis:
+            return AioRedisSessionBackend(backend_db_client)
         else:
             raise UnknownPredefinedBackend()
 

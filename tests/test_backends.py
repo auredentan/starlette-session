@@ -1,7 +1,10 @@
+import asyncio
 import re
 
 import fakeredis
+import fakeredis.aioredis
 import pytest
+from async_generator import async_generator, yield_
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -38,6 +41,12 @@ def app():
 @pytest.fixture
 def redis() -> fakeredis.FakeStrictRedis:
     return fakeredis.FakeStrictRedis()
+
+
+@pytest.fixture
+async def aioredis():
+    r = await fakeredis.aioredis.create_redis_pool()
+    return r
 
 
 def test_without_backend(app):
