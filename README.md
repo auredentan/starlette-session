@@ -85,7 +85,7 @@ You can find more example [here](https://github.com/auredentan/starlette-session
 
 ## Using a custom backend
 
-You can provide a custom backend to be used. This backend has simply to implet the interface ISessionBackend
+You can provide a custom backend to be used. This backend has simply to implement the interface ISessionBackend
 
 ```python
 class ISessionBackend(ABC):

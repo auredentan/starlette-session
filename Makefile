@@ -107,7 +107,7 @@ ifndef v
 endif
 	@poetry run failprint -t "Bumping version" -- poetry version $(v)
 	@poetry run failprint -t "Staging files" -- git add pyproject.toml CHANGELOG.md
-	@poetry run failprint -t "Committing changes" -- git commit -m "chore: Prepare release $(v)"
+	@poetry run failprint -t "Committing changes" -- git commit -m "chore: :package: Prepare release $(v) :package:"
 	@poetry run failprint -t "Tagging commit" -- git tag v$(v)
 	@poetry run failprint -t "Building dist/wheel" -- poetry build
 	-@if ! $(CI) && ! $(TESTING); then \
