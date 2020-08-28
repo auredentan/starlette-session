@@ -139,8 +139,23 @@
     Installation
   </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example">
+    Example
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#using-a-custom-backend">
+    Using a custom backend
+  </a>
+</li>
 </ul>
 </nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="reference/" title="Reference">
+      Reference
+    </a>
 </li>
 </ul>
 </nav>
@@ -168,6 +183,16 @@
     Installation
   </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example">
+    Example
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#using-a-custom-backend">
+    Using a custom backend
+  </a>
+</li>
 </ul>
 </nav>
 </div>
@@ -193,17 +218,92 @@
 <p><strong>Documentation:</strong> <a href="https://auredentan.github.io/starlette-session/">https://auredentan.github.io/starlette-session/</a></p>
 <hr/>
 <h1 id="starlette-session">Starlette Session<a class="headerlink" href="#starlette-session" title="Permanent link">¤</a></h1>
-<p>Starlette session is a simple session middleware for <a href="https://github.com/encode/starlette/">starlette</a>. It gives you the possibility of backend session with a predefined backend or a custom one.</p>
+<p>Starlette session is a simple session middleware for <a href="https://github.com/encode/starlette/">starlette</a> that enable backend side session with starlette.</p>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">¤</a></h2>
 <p>Python 3.6+</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">¤</a></h2>
 <div class="highlight"><pre><span></span><code>pip install starlette-session
+</code></pre></div>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">¤</a></h2>
+<p>Using redis as backend</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">starlette.applications</span> <span class="kn">import</span> <span class="n">Starlette</span>
+<span class="kn">from</span> <span class="nn">starlette.requests</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span> <span class="nn">starlette.responses</span> <span class="kn">import</span> <span class="n">JSONResponse</span>
+<span class="kn">from</span> <span class="nn">starlette.routing</span> <span class="kn">import</span> <span class="n">Route</span>
+
+<span class="kn">from</span> <span class="nn">starlette_session</span> <span class="kn">import</span> <span class="n">SessionMiddleware</span>
+<span class="kn">from</span> <span class="nn">starlette_session.backends</span> <span class="kn">import</span> <span class="n">BackendType</span>
+
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">Redis</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">setup_session</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONResponse</span><span class="p">:</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"data"</span><span class="p">:</span> <span class="s2">"session_data"</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">})</span>
+
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">clear_session</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">})</span>
+
+
+<span class="k">def</span> <span class="nf">view_session</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONResponse</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"session"</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">})</span>
+
+
+<span class="n">routes</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Route</span><span class="p">(</span><span class="s2">"/setup_session"</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">setup_session</span><span class="p">),</span>
+    <span class="n">Route</span><span class="p">(</span><span class="s2">"/clear_session"</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">clear_session</span><span class="p">),</span>
+    <span class="n">Route</span><span class="p">(</span><span class="s2">"/view_session"</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">view_session</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">redis_client</span> <span class="o">=</span> <span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">"localhost"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Starlette</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">routes</span><span class="o">=</span><span class="n">routes</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">SessionMiddleware</span><span class="p">,</span>
+    <span class="n">secret_key</span><span class="o">=</span><span class="s2">"secret"</span><span class="p">,</span>
+    <span class="n">cookie_name</span><span class="o">=</span><span class="s2">"cookie22"</span><span class="p">,</span>
+    <span class="n">backend_type</span><span class="o">=</span><span class="n">BackendType</span><span class="o">.</span><span class="n">redis</span><span class="p">,</span>
+    <span class="n">backend_client</span><span class="o">=</span><span class="n">redis_client</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>You can find more example <a href="https://github.com/auredentan/starlette-session/tree/master/examples">here</a></p>
+<h2 id="using-a-custom-backend">Using a custom backend<a class="headerlink" href="#using-a-custom-backend" title="Permanent link">¤</a></h2>
+<p>You can provide a custom backend to be used. This backend has simply to implet the interface ISessionBackend</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ISessionBackend</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">exp_in_mins</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 </code></pre></div>
 </article>
 </div>
 </div>
 </main>
 <footer class="md-footer">
+<div class="md-footer-nav">
+<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
+<a class="md-footer-nav__link md-footer-nav__link--next" href="reference/" rel="next" title="Reference">
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
+<span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Reference
+              </div>
+</div>
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
+</div>
+</a>
+</nav>
+</div>
 <div class="md-footer-meta md-typeset">
 <div class="md-footer-meta__inner md-grid">
 <div class="md-footer-copyright">
