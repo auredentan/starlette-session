@@ -8,9 +8,9 @@ class ISessionBackend(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    async def set(self, key: str, value: dict, exp_in_mins: str) -> Optional[str]:
+    async def set(self, key: str, value: dict, exp: Optional[int]) -> Optional[str]:
         raise NotImplementedError()
 
     @abstractmethod
-    async def delete(key: str) -> int:
+    async def delete(self, key: str) -> Any:
         raise NotImplementedError()

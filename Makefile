@@ -23,6 +23,10 @@ clean:  ## Delete temporary files.
 	@rm -rf *.egg-info 2>/dev/null
 	@find . -name "*.rej" -delete 2>/dev/null
 
+##
+# Docs
+## 
+
 .PHONY: docs
 docs: doc-regen  ## Build the documentation locally.
 	@poetry run mkdocs build
@@ -43,6 +47,25 @@ docs-deploy: doc-regen  ## Deploy the documentation on GitHub pages.
 changelog:  ## Update the changelog in-place with latest commits.
 	@poetry run failprint -t "Updating changelog" -- python scripts/update_changelog.py \
 		CHANGELOG.md "<!-- insertion marker -->" "^## \[(?P<version>[^\]]+)"
+
+##
+# Checks
+##
+
+.PHONY: check
+check: check-docs check-code-quality check-types  ## Check it all!
+
+.PHONY: check-code-quality
+check-code-quality:  ## Check the code quality.
+	@poetry run failprint -t "Checking code quality" -- flake8 --config=config/flake8.ini $(PY_SRC)
+
+.PHONY: check-docs
+check-docs:  ## Check if the documentation builds correctly.
+	@poetry run failprint -t "Building documentation" -- mkdocs build -s
+
+.PHONY: check-types
+check-types:  ## Check that the code is correctly typed.
+	@poetry run failprint -t "Type-checking" -- mypy --config-file config/mypy.ini $(PY_SRC)
 
 .PHONY: setup
 setup:  ## Setup the development environment (install dependencies).

@@ -1,4 +1,4 @@
-import aioredis
+from pymemcache.client.base import PooledClient
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -28,17 +28,12 @@ routes = [
     Route("/view_session", endpoint=view_session),
 ]
 
-
+memcache_client = PooledClient(host="localhost", port=11211)
 app = Starlette(debug=True, routes=routes)
-
-
-@app.on_event("startup")
-async def on_startup():
-    redis_client = await aioredis.create_redis_pool(("localhost", 6379))
-    app.add_middleware(
-        SessionMiddleware,
-        secret_key="secret",
-        cookie_name="cookie22",
-        backend_type=BackendType.aioRedis,
-        backend_client=redis_client,
-    )
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="secret",
+    cookie_name="cookie22",
+    backend_type=BackendType.memcache,
+    backend_client=memcache_client,
+)

@@ -5,14 +5,14 @@ from uuid import uuid4
 
 import itsdangerous
 from itsdangerous.exc import BadTimeSignature, SignatureExpired
-from starlette.applications import Starlette
-from starlette.datastructures import MutableHeaders, Secret
-from starlette.middleware.sessions import \
-    SessionMiddleware as BaseSessionMiddleware
+
+from starlette.datastructures import MutableHeaders
 from starlette.requests import HTTPConnection
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from starlette_session.backends import (AioRedisSessionBackend, BackendType,
+from starlette_session.backends import (AioMemcacheSessionBackend,
+                                        AioRedisSessionBackend, BackendType,
+                                        MemcacheSessionBackend,
                                         RedisSessionBackend)
 from starlette_session.interfaces import ISessionBackend
 
@@ -35,6 +35,25 @@ class SessionMiddleware:
         backend_client: Optional[Any] = None,
         custom_session_backend: Optional[ISessionBackend] = None,
     ) -> None:
+        """ Session Middleware
+
+            Args:
+                app: The ASGIApp
+                secret_key: The secret key to use.
+                cookie_name: The name of the cookie used to store the session id.
+                max_age: The Max-Age of the cookie (Default to 14 days).
+                same_site: The SameSite attribute of the cookie (Defaults to lax).
+                https_only: Whether to make the cookie https only (Defaults to False).
+                domain: The domain associated to the cookie (Default to None).
+                backend_type: The type of predefined backend to use (Default to None,
+                    if None we'll use a regular cookie backend).
+                backend_client: The client to use in the predefined backend. See examples for examples
+                    with predefined backends (Default to None).
+                custom_session_backend: A custom backend that implement ISessionBackend.
+
+            Raises:
+                UnknownPredefinedBackend: The predefined backend type is unkown.
+        """
         self.app = app
 
         self.backend_type = backend_type or BackendType.cookie
@@ -66,7 +85,7 @@ class SessionMiddleware:
             data = connection.cookies[self.cookie_name].encode("utf-8")
             try:
                 data = self.signer.unsign(data, max_age=self.max_age)
-                if self.backend_type == BackendType.cookie:
+                if self.backend_type == BackendType.cookie or not self.session_backend:
                     scope["session"] = json.loads(b64decode(data))
                 else:
                     session_key = json.loads(b64decode(data)).get(
@@ -88,7 +107,7 @@ class SessionMiddleware:
 
                 if scope["session"]:
 
-                    if self.backend_type == BackendType.cookie:
+                    if self.backend_type == BackendType.cookie or not self.session_backend:
                         cookie_data = scope["session"]
                     else:
                         await self.session_backend.set(
@@ -105,7 +124,7 @@ class SessionMiddleware:
 
                 elif not initial_session_was_empty:
 
-                    if self.backend_type != BackendType.cookie:
+                    if self.session_backend and self.backend_type != BackendType.cookie:
                         await self.session_backend.delete(session_key)
 
                     headers = MutableHeaders(scope=message)
@@ -116,13 +135,17 @@ class SessionMiddleware:
 
         await self.app(scope, receive, send_wrapper)
 
-    def _get_predefined_session_backend(self, backend_db_client) -> ISessionBackend:
+    def _get_predefined_session_backend(self, backend_db_client) -> Optional[ISessionBackend]:
         if self.backend_type == BackendType.redis:
             return RedisSessionBackend(backend_db_client)
         elif self.backend_type == BackendType.cookie:
-            return
+            return None
         elif self.backend_type == BackendType.aioRedis:
             return AioRedisSessionBackend(backend_db_client)
+        elif self.backend_type == BackendType.memcache:
+            return MemcacheSessionBackend(backend_db_client)
+        elif self.backend_type == BackendType.aioMemcache:
+            return AioMemcacheSessionBackend(backend_db_client)
         else:
             raise UnknownPredefinedBackend()
 

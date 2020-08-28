@@ -9,6 +9,7 @@ repo_name: "auredentan/starlette-session"
 
 nav:
   - Overview: index.md
+  - Reference: reference.md
 
 theme:
   name: material

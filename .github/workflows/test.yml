@@ -9,6 +9,44 @@ on:
     types: [opened, synchronize]
 
 jobs:
+
+  quality:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+
+    - name: Set up the cache
+      uses: actions/cache@v1
+      with:
+        path: .venv
+        key: cache-python-packages
+
+    - name: Set up the project
+      run: |
+        pip install poetry safety
+        poetry config virtualenvs.in-project true
+        make setup
+        
+    - name: Check if the documentation builds correctly
+      run: make check-docs
+
+    - name: Check the code quality
+      run: make check-code-quality
+
+    - name: Check if the code is correctly typed
+      run: make check-types
+
+    - name: Check for vulnerabilities in dependencies
+      run: make check-dependencies
+
   test:
     strategy:
       matrix:

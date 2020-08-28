@@ -1,10 +1,10 @@
-import asyncio
 import re
 
 import fakeredis
-import fakeredis.aioredis
 import pytest
-from async_generator import async_generator, yield_
+
+from pymemcache.test.utils import MockMemcacheClient
+
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -44,9 +44,8 @@ def redis() -> fakeredis.FakeStrictRedis:
 
 
 @pytest.fixture
-async def aioredis():
-    r = await fakeredis.aioredis.create_redis_pool()
-    return r
+def memcache():
+    return MockMemcacheClient()
 
 
 def test_without_backend(app):
@@ -84,6 +83,36 @@ def test_with_redis_backend(mocker, app, redis):
     spy_redis_set = mocker.spy(redis, "set")
     spy_redis_get = mocker.spy(redis, "get")
     spy_redis_delete = mocker.spy(redis, "delete")
+
+    response = client.get("/view_session")
+    assert response.json() == {"session": {}}
+
+    response = client.post("/update_session", json={"data": "something"})
+    assert response.json() == {"session": {"data": "something"}}
+    spy_redis_set.assert_called_once()
+
+    response = client.get("/view_session")
+    spy_redis_get.assert_called_once()
+
+    response = client.post("/clear_session")
+    assert response.json() == {"session": {}}
+    spy_redis_delete.assert_called_once()
+
+
+def test_with_memcache_backend(mocker, app, memcache):
+
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key="secret",
+        cookie_name="cookie",
+        backend_type=BackendType.memcache,
+        backend_client=memcache,
+    )
+    client = TestClient(app)
+
+    spy_redis_set = mocker.spy(memcache, "set")
+    spy_redis_get = mocker.spy(memcache, "get")
+    spy_redis_delete = mocker.spy(memcache, "delete")
 
     response = client.get("/view_session")
     assert response.json() == {"session": {}}

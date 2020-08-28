@@ -19,7 +19,6 @@ async def clear_session(request: Request):
 
 
 def view_session(request: Request) -> JSONResponse:
-    print(request.scope)
     return JSONResponse({"session": request.session})
 
 
