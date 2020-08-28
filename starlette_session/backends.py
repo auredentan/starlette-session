@@ -12,17 +12,17 @@ except ImportError:
 try:
     from aioredis import Redis as AioRedis
 except ImportError:
-    AioRedis = None
+    AioRedis = None  # pragma: no cover
 
 try:
     from pymemcache.client.base import Client as Memcache
 except ImportError:
-    Memcache = None
+    Memcache = None  # pragma: no cover
 
 try:
     from aiomcache import Client as AioMemcache
 except ImportError:
-    AioMemcache = None
+    AioMemcache = None  # pragma: no cover
 
 
 from starlette_session.interfaces import ISessionBackend
@@ -73,20 +73,20 @@ class RedisSessionBackend(ISessionBackend):
         return self.redis.delete(key)
 
 
-class AioRedisSessionBackend(ISessionBackend):
-    def __init__(self, redis: AioRedis):
+class AioRedisSessionBackend(ISessionBackend): 
+    def __init__(self, redis: AioRedis):  # pragma: no cover
         self.redis = redis
 
-    async def get(self, key: str) -> Optional[dict]:
+    async def get(self, key: str) -> Optional[dict]:  # pragma: no cover
         value = await self.redis.get(key)
         return _loads(value) if value else None
 
     async def set(
         self, key: str, value: dict, exp: Optional[int] = None
-    ) -> Optional[str]:
+    ) -> Optional[str]:  # pragma: no cover
         return await self.redis.set(key, _dumps(value), expire=exp)
 
-    async def delete(self, key: str) -> Any:
+    async def delete(self, key: str) -> Any:  # pragma: no cover
         return await self.redis.delete(key)
 
 
@@ -109,17 +109,17 @@ class MemcacheSessionBackend(ISessionBackend):
 
 
 class AioMemcacheSessionBackend(ISessionBackend):
-    def __init__(self, memcache: AioMemcache):
+    def __init__(self, memcache: AioMemcache):  # pragma: no cover
         self.memcache = memcache
 
-    async def get(self, key: str) -> Optional[dict]:
+    async def get(self, key: str) -> Optional[dict]:  # pragma: no cover
         value = await self.memcache.get(key.encode())
         return _loads(value) if value else None
 
     async def set(
         self, key: str, value: dict, exp: Optional[int] = None
-    ) -> Optional[str]:
+    ) -> Optional[str]:  # pragma: no cover
         return await self.memcache.set(key.encode(), _dumps(value), exptime=exp)
 
-    async def delete(self, key: str) -> Any:
+    async def delete(self, key: str) -> Any:  # pragma: no cover
         return await self.memcache.delete(key.encode())

@@ -11,7 +11,7 @@ from starlette.responses import JSONResponse
 from starlette.testclient import TestClient
 
 from starlette_session import SessionMiddleware
-from starlette_session.backends import BackendType
+from starlette_session.backends import BackendType, MemcacheJSONSerde
 
 
 def view_session(request: Request) -> JSONResponse:
@@ -46,6 +46,20 @@ def redis() -> fakeredis.FakeStrictRedis:
 @pytest.fixture
 def memcache():
     return MockMemcacheClient()
+
+def test_MemcacheJSONSerde():
+    serde = MemcacheJSONSerde()
+
+    assert serde.serialize("key", "test") == ("test", 1)
+
+    assert serde.serialize("key", {"key1": "test"}) == ('{"key1": "test"}', 2)
+
+    assert serde.deserialize("key", "value", 1) == "value"
+
+    assert serde.deserialize("key", '{"key1": "test"}', 2) == {"key1": "test"}
+
+    with pytest.raises(Exception):
+        serde.deserialize("key", '{"key1": "test"}', -1)
 
 
 def test_without_backend(app):

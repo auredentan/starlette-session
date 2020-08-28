@@ -120,4 +120,4 @@ endif
 
 .PHONY: test
 test:  ## Run the test suite and report coverage.
-	@poetry run pytest
+	@poetry run pytest --cov starlette_session
