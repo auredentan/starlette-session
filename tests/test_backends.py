@@ -2,9 +2,7 @@ import re
 
 import fakeredis
 import pytest
-
 from pymemcache.test.utils import MockMemcacheClient
-
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -46,6 +44,7 @@ def redis() -> fakeredis.FakeStrictRedis:
 @pytest.fixture
 def memcache():
     return MockMemcacheClient()
+
 
 def test_MemcacheJSONSerde():
     serde = MemcacheJSONSerde()

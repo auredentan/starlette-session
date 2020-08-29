@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import itsdangerous
 from itsdangerous.exc import BadTimeSignature, SignatureExpired
-
 from starlette.datastructures import MutableHeaders
 from starlette.requests import HTTPConnection
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -107,7 +106,10 @@ class SessionMiddleware:
 
                 if scope["session"]:
 
-                    if self.backend_type == BackendType.cookie or not self.session_backend:
+                    if (
+                        self.backend_type == BackendType.cookie
+                        or not self.session_backend
+                    ):
                         cookie_data = scope["session"]
                     else:
                         await self.session_backend.set(
@@ -135,7 +137,9 @@ class SessionMiddleware:
 
         await self.app(scope, receive, send_wrapper)
 
-    def _get_predefined_session_backend(self, backend_db_client) -> Optional[ISessionBackend]:
+    def _get_predefined_session_backend(
+        self, backend_db_client
+    ) -> Optional[ISessionBackend]:
         if self.backend_type == BackendType.redis:
             return RedisSessionBackend(backend_db_client)
         elif self.backend_type == BackendType.cookie:

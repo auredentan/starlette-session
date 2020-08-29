@@ -73,7 +73,7 @@ class RedisSessionBackend(ISessionBackend):
         return self.redis.delete(key)
 
 
-class AioRedisSessionBackend(ISessionBackend): 
+class AioRedisSessionBackend(ISessionBackend):
     def __init__(self, redis: AioRedis):  # pragma: no cover
         self.redis = redis
 

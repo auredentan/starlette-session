@@ -93,6 +93,7 @@ setup:  ## Setup the development environment (install dependencies).
 		fi; \
 	fi; \
 	poetry install -v
+	pre-commit install
 
 .PHONY: format
 format:  ## Run formatting tools on the code.
@@ -107,7 +108,7 @@ ifndef v
 endif
 	@poetry run failprint -t "Bumping version" -- poetry version $(v)
 	@poetry run failprint -t "Staging files" -- git add pyproject.toml CHANGELOG.md
-	@poetry run failprint -t "Committing changes" -- git commit -m "chore: :package: Prepare release $(v) :package:"
+	@poetry run failprint -t "Committing changes" -- git commit -m ":package: Prepare release $(v) :package:"
 	@poetry run failprint -t "Tagging commit" -- git tag v$(v)
 	@poetry run failprint -t "Building dist/wheel" -- poetry build
 	-@if ! $(CI) && ! $(TESTING); then \

@@ -1,0 +1,25 @@
+  
+repos:
+    -   repo: local
+        hooks:
+        -   id: format
+            name: format
+            entry: make format
+            pass_filenames: false
+            language: system
+        -   id: check
+            name: check
+            entry: make check
+            pass_filenames: false
+            language: system
+    
+    
+    -   repo: https://github.com/pre-commit/pre-commit-hooks
+        rev: v2.1.0  # Use the ref you want to point at
+        stages:
+        - commit
+        - push
+        hooks:
+        -   id: check-added-large-files
+        -   id: detect-private-key
+        -   id: check-merge-conflict
