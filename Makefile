@@ -93,8 +93,10 @@ setup:  ## Setup the development environment (install dependencies).
 		fi; \
 	fi; \
 	poetry install -v
-	pre-commit install
-
+	@if ! $(CI); then \
+		poetry run pre-commit install; \
+	fi;
+	
 .PHONY: format
 format:  ## Run formatting tools on the code.
 	@poetry run failprint -t "Formatting code" -- black $(PY_SRC)
