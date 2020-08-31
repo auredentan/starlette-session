@@ -22,7 +22,7 @@
 
 # Starlette Session
 
-Starlette session is a simple session middleware for [starlette](https://github.com/encode/starlette/) that enable backend side session with starlette.
+Starlette session is a simple session middleware for [starlette](https://github.com/encode/starlette/) that enable server side session with starlette.
 
 ## Requirements
 
