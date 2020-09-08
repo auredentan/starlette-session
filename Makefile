@@ -53,7 +53,7 @@ changelog:  ## Update the changelog in-place with latest commits.
 ##
 
 .PHONY: check
-check: check-docs check-code-quality check-types check-dependencies ## Check it all!
+check: check-docs check-code-quality check-types ## Check it all!
 
 .PHONY: check-code-quality
 check-code-quality:  ## Check the code quality.
@@ -66,17 +66,6 @@ check-docs:  ## Check if the documentation builds correctly.
 .PHONY: check-types
 check-types:  ## Check that the code is correctly typed.
 	@poetry run failprint -t "Type-checking" -- mypy --config-file config/mypy.ini $(PY_SRC)
-
-.PHONY: check-dependencies
-check-dependencies:  ## Check for vulnerabilities in dependencies.
-	@SAFETY=safety; \
-	if ! $(CI); then \
-		if ! command -v $$SAFETY &>/dev/null; then \
-			SAFETY="pipx run safety"; \
-		fi; \
-	fi; \
-	poetry export -f requirements.txt --without-hashes | \
-		poetry run failprint --no-pty -t "Checking dependencies" -- $$SAFETY check --stdin --full-report
 
 ##
 # Setup
