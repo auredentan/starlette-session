@@ -8,8 +8,8 @@ license = "MIT"
 
 readme = "README.md"
 
-homepage = "https://github.com/auredentan/starlette-sessionhttps://github.com/auredentan/starlette-session"
-repository = "https://github.com/auredentan/starlette-sessionhttps://github.com/auredentan/starlette-session"
+homepage = "https://github.com/auredentan/starlette-session"
+repository = "https://github.com/auredentan/starlette-session"
 
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
