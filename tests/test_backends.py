@@ -2,6 +2,7 @@ import re
 
 import fakeredis
 import pytest
+from sqlalchemy.ext.asyncio import create_async_engine
 from pymemcache.test.utils import MockMemcacheClient
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -9,7 +10,7 @@ from starlette.responses import JSONResponse
 from starlette.testclient import TestClient
 
 from starlette_session import SessionMiddleware
-from starlette_session.backends import BackendType, MemcacheJSONSerde
+from starlette_session.backends import BackendType, MemcacheJSONSerde, Base
 
 
 def view_session(request: Request) -> JSONResponse:
@@ -140,3 +141,39 @@ def test_with_memcache_backend(mocker, app, memcache):
     response = client.post("/clear_session")
     assert response.json() == {"session": {}}
     spy_redis_delete.assert_called_once()
+
+
+def test_sqlalchemy_backend(app):
+    engine = create_async_engine(
+        # "postgresql+asyncpg://scott:tiger@localhost/test",
+        # "sqlite+aiosqlite:///db.db",
+        "sqlite+aiosqlite://",
+    )
+
+    async def clear_db():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
+
+    import asyncio
+    asyncio.run(clear_db())
+
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key="secret",
+        cookie_name="cookie",
+        backend_type=BackendType.sqlalchemy,
+        backend_client=engine,
+    )
+    client = TestClient(app)
+    response = client.get("/view_session")
+    assert response.json() == {"session": {}}
+
+    response = client.post("/update_session", json={"data": "something"})
+    assert response.json() == {"session": {"data": "something"}}
+
+    response = client.get("/view_session")
+    assert response.json() == {"session": {"data": "something"}}
+
+    response = client.post("/clear_session")
+    assert response.json() == {"session": {}}

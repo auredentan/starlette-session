@@ -12,7 +12,8 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from starlette_session.backends import (AioMemcacheSessionBackend,
                                         AioRedisSessionBackend, BackendType,
                                         MemcacheSessionBackend,
-                                        RedisSessionBackend)
+                                        RedisSessionBackend,
+                                        SQLAlchemySessionBackend)
 from starlette_session.interfaces import ISessionBackend
 
 
@@ -150,6 +151,8 @@ class SessionMiddleware:
             return MemcacheSessionBackend(backend_db_client)
         elif self.backend_type == BackendType.aioMemcache:
             return AioMemcacheSessionBackend(backend_db_client)
+        elif self.backend_type == BackendType.sqlalchemy:
+            return SQLAlchemySessionBackend(backend_db_client)
         else:
             raise UnknownPredefinedBackend()
 

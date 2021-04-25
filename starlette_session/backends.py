@@ -25,6 +25,38 @@ except ImportError:
     AioMemcache = None  # pragma: no cover
 
 
+try:
+    from sqlalchemy import Column, Unicode, UnicodeText, func, DateTime
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.future import select
+    from sqlalchemy.orm import sessionmaker
+
+    Base = declarative_base()
+
+    class SessionStore(Base):
+        __tablename__ = "session_store"
+
+        key = Column(Unicode(128), primary_key=True)
+        value = Column(UnicodeText)
+        created = Column(DateTime, server_default=func.now())
+
+        # required in order to access columns with server defaults
+        # or SQL expression defaults, subsequent to a flush, without
+        # triggering an expired load
+        __mapper_args__ = {"eager_defaults": True}
+
+        def __repr__(self):
+            return (
+                f"<{self.__class__.__name__} created: {self.created} "
+                f"key: {self.key} value: {self.value}>"
+            )
+
+
+except ImportError:
+    ...
+
+
 from starlette_session.interfaces import ISessionBackend
 
 _dumps = partial(dumps, protocol=HIGHEST_PROTOCOL)
@@ -53,6 +85,7 @@ class BackendType(Enum):
     cookie = "cookie"
     memcache = "memcache"
     aioMemcache = "aioMemcache"
+    sqlalchemy = "sqlalchemy"
 
 
 class RedisSessionBackend(ISessionBackend):
@@ -123,3 +156,41 @@ class AioMemcacheSessionBackend(ISessionBackend):
 
     async def delete(self, key: str) -> Any:  # pragma: no cover
         return await self.memcache.delete(key.encode())
+
+
+class SQLAlchemySessionBackend(ISessionBackend):
+    def __init__(self, engine):  # pragma: no cover
+        self.engine = engine
+        # async with engine.begin() as conn:
+        #     await conn.run_sync(Base.metadata.create_all)
+
+        self.session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+
+    async def get(self, key: str) -> Optional[dict]:  # pragma: no cover
+        async with self.session() as session:
+            stmt = select(SessionStore).filter(SessionStore.key == key)
+            result = await session.execute(stmt)
+            obj = result.fetchone()[0]
+            return json.loads(obj.value)
+
+    async def set(
+        self, key: str, value: dict, exp: Optional[int] = None
+    ) -> Optional[str]:  # pragma: no cover
+        async with self.session() as session:
+            async with session.begin():
+                stmt = select(SessionStore).filter(SessionStore.key == key)
+                result = await session.execute(stmt)
+                obj = result.fetchone()
+                if not obj:
+                    obj = SessionStore(key=key)
+                else:
+                    obj = obj[0]
+                obj.value = json.dumps(value)
+                return session.add(obj)
+
+    async def delete(self, key: str) -> Any:  # pragma: no cover
+        async with self.session() as session:
+            stmt = select(SessionStore).filter(SessionStore.key == key)
+            result = await session.execute(stmt)
+            obj = result.fetchone()[0]
+            return await session.delete(obj)
