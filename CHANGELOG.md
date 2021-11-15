@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2
+
+## Misc
+
+* Relax starlette dependency requirement 
+
 ## 0.4.0
 
 ### Added
