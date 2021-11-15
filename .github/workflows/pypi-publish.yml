@@ -1,0 +1,13 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+  
+jobs:
+  publish:
+    - run: poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
+    - name: Publish package
+      run: poetry publish --build
+  
