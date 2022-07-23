@@ -84,7 +84,7 @@ class AioRedisSessionBackend(ISessionBackend):
     async def set(
         self, key: str, value: dict, exp: Optional[int] = None
     ) -> Optional[str]:  # pragma: no cover
-        return await self.redis.set(key, _dumps(value), expire=exp)
+        return await self.redis.set(key, _dumps(value), exp)
 
     async def delete(self, key: str) -> Any:  # pragma: no cover
         return await self.redis.delete(key)
