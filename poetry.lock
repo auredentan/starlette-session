@@ -3,7 +3,7 @@ name = "aioredis"
 version = "2.0.1"
 description = "asyncio (PEP 3156) Redis support"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -954,7 +954,7 @@ redis = ["redis"]
 [metadata]
 lock-version = "1.1"
 python-versions = "<4,>=3.7"
-content-hash = "a0cd68ff68e0c07cdd2bfcf3eef171fbf1c263e1086f68bdbfc5c6e1a5c0a453"
+content-hash = "e07f38ef80a5f61040629eba7d0468e2a852a1403d1eb6b4f6f880394cfe270f"
 
 [metadata.files]
 aioredis = [
