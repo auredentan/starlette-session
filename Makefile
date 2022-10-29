@@ -45,7 +45,7 @@ docs-deploy: doc-regen  ## Deploy the documentation on GitHub pages.
 
 .PHONY: changelog
 changelog:  ## Update the changelog in-place with latest commits.
-	@poetry run failprint -t "Updating changelog" -- python scripts/update_changelog.py \
+	@poetry run python scripts/update_changelog.py \
 		CHANGELOG.md "<!-- insertion marker -->" "^## \[(?P<version>[^\]]+)"
 
 ##
@@ -53,19 +53,15 @@ changelog:  ## Update the changelog in-place with latest commits.
 ##
 
 .PHONY: check
-check: check-docs check-code-quality check-types ## Check it all!
-
-.PHONY: check-code-quality
-check-code-quality:  ## Check the code quality.
-	@poetry run failprint -t "Checking code quality" -- flake8 --config=config/flake8.ini $(PY_SRC)
+check: check-docs check-types ## Check it all!
 
 .PHONY: check-docs
 check-docs:  ## Check if the documentation builds correctly.
-	@poetry run failprint -t "Building documentation" -- mkdocs build -s
+	@poetry run mkdocs build
 
 .PHONY: check-types
 check-types:  ## Check that the code is correctly typed.
-	@poetry run failprint -t "Type-checking" -- mypy --config-file config/mypy.ini $(PY_SRC)
+	@poetry run mypy --config-file=./config/mypy.ini $(PY_SRC)
 
 ##
 # Setup
@@ -88,8 +84,8 @@ setup:  ## Setup the development environment (install dependencies).
 	
 .PHONY: format
 format:  ## Run formatting tools on the code.
-	@poetry run failprint -t "Formatting code" -- black $(PY_SRC)
-	@poetry run failprint -t "Ordering imports" -- isort -rc $(PY_SRC)
+	@poetry run black $(PY_SRC)
+	@poetry run isort -rc $(PY_SRC)
 
 
 .PHONY: release
@@ -97,16 +93,16 @@ release:  ## Create a new release (commit, tag, push, build, publish, deploy doc
 ifndef v
 	$(error Pass the new version with 'make release v=0.0.0')
 endif
-	@poetry run failprint -t "Bumping version" -- poetry version $(v)
-	@poetry run failprint -t "Staging files" -- git add pyproject.toml CHANGELOG.md
-	@poetry run failprint -t "Committing changes" -- git commit -m ":package: Prepare release $(v) :package:"
-	@poetry run failprint -t "Tagging commit" -- git tag v$(v)
-	@poetry run failprint -t "Building dist/wheel" -- poetry build
+	@poetry run poetry version $(v)
+	@poetry run git add pyproject.toml CHANGELOG.md
+	@poetry run git commit -m ":package: Prepare release $(v) :package:"
+	@poetry run git tag v$(v)
+	@poetry run poetry build
 	-@if ! $(CI) && ! $(TESTING); then \
-		poetry run failprint -t "Pushing commits" -- git push; \
-		poetry run failprint -t "Pushing tags" -- git push --tags; \
-		poetry run failprint -t "Publishing version" -- poetry publish; \
-		poetry run failprint -t "Deploying docs" -- poetry run mkdocs gh-deploy; \
+		poetry run git push; \
+		poetry run git push --tags; \
+		poetry run poetry publish; \
+		poetry run poetry run mkdocs gh-deploy; \
 	fi
 
 
