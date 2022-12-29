@@ -92,6 +92,8 @@ class SessionMiddleware:
                     )
                     scope["session"] = await self.session_backend.get(session_key)
                     scope["__session_key"] = session_key
+                    if scope.get("session") is None:
+                        scope["session"] = {}
 
                 initial_session_was_empty = False
             except (BadTimeSignature, SignatureExpired):
